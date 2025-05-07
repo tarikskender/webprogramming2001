@@ -7,7 +7,7 @@ $(document).ready(function () {
     }
 
     $.ajax({
-      url: "../../../backend/dao/getTask.php", // path to getter
+      url: "../../../backend/dao/tasks/getTask.php", // path to getter
       method: "GET",
       dataType: "json",
       success: function (tasks) {
@@ -24,11 +24,11 @@ $(document).ready(function () {
         }
 
         $.each(tasks, function (index, task) {
-          // building the task, creating
+          // Build the task HTML, using the task.image_type value for the image source.
           var taskHtml = `
             <div class="col-md-2" id="task-${task.id}" style="width: 100%;">
               <div class="card">
-                <img src="../assets/images/products/s4.jpg" class="card-img-top" alt="${task.title}" />
+                <img src="../assets/images/tasks/${task.image_type}" class="card-img-top" alt="${task.title}" style="width: 100%; height: 200px; object-fit: cover;" />
                 <div class="card-body">
                   <h5 class="card-title">${task.title}</h5>
                   <p class="card-text">${task.description}</p>
@@ -50,7 +50,7 @@ $(document).ready(function () {
           }
 
           $.ajax({
-            url: "http://127.0.0.1:8000/backend/api/deleteTask.php",
+            url: "http://localhost:8000/backend/dao/tasks/deleteTask.php",
             method: "POST",
             contentType: "application/json",
             data: JSON.stringify({ id: taskId }),
@@ -92,7 +92,7 @@ $(document).ready(function () {
     var updatedDescription = $("#editTaskDescription").val();
 
     $.ajax({
-      url: "http://127.0.0.1:8000/backend/dao/updateTask.php",
+      url: "http://localhost:8000/backend/dao/tasks/updateTask.php",
       method: "POST",
       contentType: "application/json",
       data: JSON.stringify({

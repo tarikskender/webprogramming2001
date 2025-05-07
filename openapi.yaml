@@ -1,0 +1,408 @@
+openapi: 3.0.0
+info:
+  title: LifeMaxxing API
+  version: 1.0.0
+
+tags:
+  - name: Tasks
+    description: Task endpoints
+  - name: Users
+    description: User endpoints
+  - name: Categories
+    description: Category endpoints
+  - name: Friends
+    description: Friends endpoints
+  - name: Follows
+    description: Follows endpoints
+
+servers:
+  - url: http://localhost:8000/backend/dao
+
+paths:
+
+  /tasks/getTask.php:
+    get:
+      tags:
+        - Tasks
+      summary: Get all tasks
+      responses:
+        '200':
+          description: Successful response
+
+  /tasks/createTask.php:
+    post:
+      tags:
+        - Tasks
+      summary: Create a new task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Task created
+
+  /tasks/updateTask.php:
+    put:
+      tags:
+        - Tasks
+      summary: Update a task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                title:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Task updated
+
+  /tasks/deleteTask.php:
+    delete:
+      tags:
+        - Tasks
+      summary: Delete a task
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Task deleted
+
+  /users/getAllUsers.php:
+    get:
+      tags:
+        - Users
+      summary: Get all users
+      responses:
+        '200':
+          description: List of users
+
+  /users/getUser.php:
+    get:
+      tags:
+        - Users
+      summary: Get a single user by ID
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User found
+        '404':
+          description: User not found
+
+  /users/createUser.php:
+    post:
+      tags:
+        - Users
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: User created
+
+  /users/updateUser.php:
+    put:
+      tags:
+        - Users
+      summary: Update a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+                email:
+                  type: string
+      responses:
+        '200':
+          description: User updated
+
+  /users/deleteUser.php:
+    delete:
+      tags:
+        - Users
+      summary: Delete a user
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User deleted
+
+  /categories/getAllCategories.php:
+    get:
+      tags:
+        - Categories
+      summary: Get all categories
+      responses:
+        '200':
+          description: List of categories
+
+  /categories/getCategory.php:
+    get:
+      tags:
+        - Categories
+      summary: Get a category by ID
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Category found
+
+  /categories/createCategory.php:
+    post:
+      tags:
+        - Categories
+      summary: Create a category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+      responses:
+        '200':
+          description: Category created
+
+  /categories/updateCategory.php:
+    put:
+      tags:
+        - Categories
+      summary: Update a category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - title
+              properties:
+                id:
+                  type: integer
+                title:
+                  type: string
+      responses:
+        '200':
+          description: Category updated
+
+  /categories/deleteCategory.php:
+    delete:
+      tags:
+        - Categories
+      summary: Delete a category
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Category deleted
+
+  /friends/getAllFriends.php:
+    get:
+      tags:
+        - Friends
+      summary: Get all friendships
+      responses:
+        '200':
+          description: List of all friendships
+
+  /friends/getFriend.php:
+    get:
+      tags:
+        - Friends
+      summary: Get a specific friendship
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: friend_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Friendship found
+        '404':
+          description: Friendship not found
+
+  /friends/createFriend.php:
+    post:
+      tags:
+        - Friends
+      summary: Create a new friendship
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+                - friend_id
+              properties:
+                user_id:
+                  type: integer
+                friend_id:
+                  type: integer
+      responses:
+        '200':
+          description: Friendship created
+
+  /friends/deleteFriend.php:
+    delete:
+      tags:
+        - Friends
+      summary: Delete a friendship
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: friend_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Friendship deleted
+
+  /follows/getAllFollows.php:
+    get:
+      tags:
+        - Follows
+      summary: Get all follows
+      responses:
+        '200':
+          description: List of follow relationships
+
+  /follows/getFollow.php:
+    get:
+      tags:
+        - Follows
+      summary: Get a follow relationship
+      parameters:
+        - name: following_user_id
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: followed_user_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Follow found
+        '404':
+          description: Not found
+
+  /follows/createFollow.php:
+    post:
+      tags:
+        - Follows
+      summary: Create a follow relationship
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - following_user_id
+                - followed_user_id
+              properties:
+                following_user_id:
+                  type: integer
+                followed_user_id:
+                  type: integer
+      responses:
+        '200':
+          description: Follow created
+
+  /follows/deleteFollow.php:
+    delete:
+      tags:
+        - Follows
+      summary: Delete a follow relationship
+      parameters:
+        - name: following_user_id
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: followed_user_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Follow deleted

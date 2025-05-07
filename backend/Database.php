@@ -3,7 +3,7 @@ class Database {
     private $host = 'localhost';  
     private $db_name = 'lifemaxxer'; 
     private $username = 'root';  // Database username
-    private $password = 'hhgg65211';  // Database password (you can set this after running the mysql_secure_installation script)
+    private $password = 'hhgg65211';  // Database password 
     private $conn;
 
     // Get the database connection

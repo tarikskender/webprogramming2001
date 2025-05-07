@@ -8,6 +8,11 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 3rem; /* Adjust spacing between grid items as needed */
 }
+
+.card-img-top {
+  display: inline;
+  height: 50%;
+}
 @media (max-width: 768px) {
   #task-holder {
     grid-template-columns: repeat(2, 1fr);

@@ -13,7 +13,6 @@ class BaseDao {
             $stmt->execute($params);
             return $stmt;
         } catch (PDOException $e) {
-            // In production, log the error
             throw new Exception("Database error: " . $e->getMessage());
         }
     }

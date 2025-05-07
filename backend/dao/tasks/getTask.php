@@ -2,8 +2,8 @@
 
 header("Content-Type: application/json");
 
-require_once 'Database.php';
-require_once 'TaskDao.php';
+require_once __DIR__ . '/../../Database.php';   // ← same logic
+require_once __DIR__ . '/TaskDao.php';
 
 $database = new Database();
 $conn = $database->getConnection();

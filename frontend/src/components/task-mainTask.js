@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
         createdAt: new Date().toISOString(),
       };
 
-      fetch("http://localhost:8000/backend/dao/createTask.php", {
+      fetch("http://localhost:8000/backend/dao/tasks/createTask.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

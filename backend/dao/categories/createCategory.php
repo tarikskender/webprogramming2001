@@ -1,0 +1,28 @@
+<?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit(0);
+}
+
+require_once __DIR__ . '/../../Database.php';
+require_once __DIR__ . '/CategoryDao.php';
+
+$database = new Database();
+$conn = $database->getConnection();
+$dao = new CategoryDao($conn);
+
+$data = json_decode(file_get_contents("php://input"), true);
+
+if (!isset($data['title']) || empty(trim($data['title']))) {
+    http_response_code(400);
+    echo json_encode(["error" => "Missing or empty 'title' field"]);
+    exit;
+}
+
+$dao->createCategory(['title' => trim($data['title'])]);
+echo json_encode(["message" => "Category created"]);
+?>
