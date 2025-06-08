@@ -1,6 +1,9 @@
 <?php
 
+header("Content-Security-Policy: default-src 'self'; script-src 'self';");
+
 require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/routes/formRoutes.php';
 require_once __DIR__ . '/../../Database.php';   // ← goes up from dao/tasks/
 require_once __DIR__ . '/../BaseDao.php';       // ← goes up to dao/
 
