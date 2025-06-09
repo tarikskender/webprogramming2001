@@ -1,0 +1,466 @@
+package ibu.edu.ba.labexampreparation.dao
+
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.Update
+
+
+@Dao
+interface BaseDao<T> {
+    /**
+     * Provide insert, update and delete functions
+     */
+
+    @Insert
+    suspend fun insert(entity: T)
+
+    @Update
+    suspend fun update(entity: T)
+
+    @Delete
+    suspend fun delete(entity: T)
+}
+
+--------------------------------------------------------------------------------------------USERS-DAO----------------
+
+package ibu.edu.ba.labexampreparation.dao
+
+import androidx.room.Dao
+import androidx.room.Query
+import ibu.edu.ba.labexampreparation.model.Users
+
+@Dao
+interface UsersDao: BaseDao<Users> {
+    @Query("SELECT * FROM users")
+    suspend fun getAllUsers(): List<Users>?
+
+    @Query("SELECT * FROM users WHERE id = :id")
+    suspend fun getUserById(id: Int): Users?
+}
+
+--------------------------------------------------------------------------------------------APP-DATABASE----------------
+
+package ibu.edu.ba.labexampreparation.database
+
+import androidx.room.Database
+import androidx.room.RoomDatabase
+import ibu.edu.ba.labexampreparation.dao.UsersDao
+import ibu.edu.ba.labexampreparation.model.Users
+import ibu.edu.ba.labexampreparation.repository.UsersRepository
+
+@Database(
+    entities = [Users::class],
+    version = 1,
+)
+abstract class AppDatabase: RoomDatabase() {
+    abstract fun usersDao() : UsersDao
+//    abstract fun usersRepository() : UsersRepository
+}
+
+--------------------------------------------------------------------------------------------USERS----------------
+
+package ibu.edu.ba.labexampreparation.model
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "users")
+data class Users(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val name: String,
+    val email: String
+)
+
+--------------------------------------------------------------------------------------------DATABASE-MODULE----------------
+
+package ibu.edu.ba.labexampreparation.di
+
+import android.content.Context
+import androidx.room.Room
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import ibu.edu.ba.labexampreparation.dao.UsersDao
+import ibu.edu.ba.labexampreparation.database.AppDatabase
+import ibu.edu.ba.labexampreparation.repository.UsersRepository
+import ibu.edu.ba.labexampreparation.repository.UsersRepositoryImpl
+import javax.inject.Singleton
+import kotlin.jvm.java
+
+@Module
+@InstallIn(SingletonComponent::class)
+object DatabaseModule {
+    /**
+     * Provide missing annotations for database instance...
+     *
+     * You should uncomment the below code and start working on it...
+     */
+    @Provides
+    @Singleton
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
+        return Room.databaseBuilder(
+            context.applicationContext,
+            AppDatabase::class.java,
+            "preparation.db",
+        ).fallbackToDestructiveMigration(true).build()
+    }
+
+    /**
+     * Provide other functions that are gonna be used for dependency injection...
+     */
+
+    @Provides
+    fun provideUsersDao(appDatabase: AppDatabase): UsersDao = appDatabase.usersDao()
+
+    @Provides
+    fun provideUsersRepository(usersDao: UsersDao): UsersRepository =
+        UsersRepositoryImpl(usersDao)
+
+
+//    @Provides
+//    fun provideUsersRepository(usersDao: UsersDao): UsersRepository =
+//        UsersRepositoryImpl(usersDao)
+}
+
+--------------------------------------------------------------------------------------------USERS----------------
+
+package ibu.edu.ba.labexampreparation.model
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "users")
+data class Users(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val name: String,
+    val email: String
+)
+
+--------------------------------------------------------------------------------------------BASE-REPO------------
+
+package ibu.edu.ba.labexampreparation.repository
+
+
+interface BaseRepository<T> {
+    suspend fun insert(entity: T)
+    suspend fun update(entity: T)
+    suspend fun delete(entity: T)
+}
+
+--------------------------------------------------------------------------------------------USERS-REPO-----------
+
+package ibu.edu.ba.labexampreparation.repository
+
+import ibu.edu.ba.labexampreparation.model.Users
+
+interface UsersRepository : BaseRepository<Users> {
+    suspend fun getAllUsers(): List<Users>?
+    suspend fun getUserById(id: Int): Users?
+}
+
+--------------------------------------------------------------------------------------------USERS-REPO-IMPL------
+
+package ibu.edu.ba.labexampreparation.repository
+
+import ibu.edu.ba.labexampreparation.dao.UsersDao
+import ibu.edu.ba.labexampreparation.model.Users
+import javax.inject.Inject
+
+
+class UsersRepositoryImpl @Inject constructor(private val usersDao: UsersDao): UsersRepository {
+    override suspend fun getAllUsers(): List<Users>? {
+        return usersDao.getAllUsers()
+    }
+
+    override suspend fun getUserById(id: Int): Users? {
+        return usersDao.getUserById(id)
+    }
+
+    override suspend fun insert(entity: Users) {
+        return usersDao.insert(entity)
+    }
+
+    override suspend fun update(entity: Users) {
+        return usersDao.update(entity)
+    }
+
+    override suspend fun delete(entity: Users) {
+        return usersDao.delete(entity)
+    }
+}
+
+--------------------------------------------------------------------------------------------APP-NAV-HOST----------------
+
+package ibu.edu.ba.labexampreparation.ui.navigation
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import ibu.edu.ba.labexampreparation.ui.navigation.EntryScreen
+import ibu.edu.ba.labexampreparation.ui.navigation.UserListScreen
+import ibu.edu.ba.labexampreparation.ui.screen.EntryScreen
+import ibu.edu.ba.labexampreparation.ui.screen.UserListScreen
+import ibu.edu.ba.labexampreparation.viewmodel.UserViewModel
+import kotlinx.serialization.Serializable
+
+@Serializable object EntryScreen
+@Serializable object UserListScreen
+
+@Composable
+fun AppNavHost(modifier: Modifier = Modifier) {
+    val navController = rememberNavController()
+
+    /**
+     * Define navigation host with initialized nav. controller...
+     * After defining navigation host, provide composable routes that will be used
+     * (same as we have been doing on lab sessions)
+     */
+
+    NavHost(navController = navController, startDestination = EntryScreen) {
+        composable<EntryScreen> { EntryScreen(navController) }
+        composable<UserListScreen> {
+            val viewModel = hiltViewModel<UserViewModel>()
+            UserListScreen(viewModel)
+        }
+    }
+
+
+}
+
+--------------------------------------------------------------------------------------------ENTRY-SCREEN---------
+
+package ibu.edu.ba.labexampreparation.ui.screen
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import ibu.edu.ba.labexampreparation.ui.navigation.UserListScreen
+
+@Composable
+fun EntryScreen(navController: NavController) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Button(onClick = { navController.navigate(UserListScreen) }) {
+            Text("Go to User List")
+        }
+    }
+}
+
+--------------------------------------------------------------------------------------------USERS-LIST-SCREEN----
+
+package ibu.edu.ba.labexampreparation.ui.screen
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import ibu.edu.ba.labexampreparation.model.Users
+import ibu.edu.ba.labexampreparation.viewmodel.UserViewModel
+
+@Composable
+fun UserListScreen(viewModel: UserViewModel) {
+    val users by viewModel.users.collectAsState()
+
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Text("User List", style = MaterialTheme.typography.headlineSmall)
+
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            items(users) { user ->
+                UserItem(user = user, onDelete = { viewModel.deleteUser(user) })
+            }
+        }
+    }
+}
+
+@Composable
+fun UserItem(user: Users, onDelete: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        elevation = CardDefaults.cardElevation()
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                Text("Name: ${user.name}")
+                Text("Email: ${user.email}")
+            }
+
+        }
+    }
+}
+
+--------------------------------------------------------------------------------------------USER-VIEW-MODEL----------------
+
+package ibu.edu.ba.labexampreparation.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import ibu.edu.ba.labexampreparation.model.Users
+import ibu.edu.ba.labexampreparation.repository.UsersRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+
+@HiltViewModel
+class UserViewModel @Inject constructor(
+    private val repository: UsersRepository
+) : ViewModel() {
+
+    private val _users = MutableStateFlow<List<Users>>(emptyList())
+    val users: StateFlow<List<Users>> = _users
+
+    init {
+        fetchUsers()
+    }
+
+    private fun fetchUsers() {
+        viewModelScope.launch {
+            _users.value = repository.getAllUsers() ?: emptyList()
+        }
+    }
+
+    fun addUser(user: Users) {
+        viewModelScope.launch {
+            repository.insert(user)
+            fetchUsers()
+        }
+    }
+
+    fun deleteUser(user: Users) {
+        viewModelScope.launch {
+            repository.delete(user)
+            fetchUsers()
+        }
+    }
+}
+
+--------------------------------------------------------------------------------------------LAB-EXAM----------------
+
+package ibu.edu.ba.labexampreparation
+
+import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
+import ibu.edu.ba.labexampreparation.database.AppDatabase
+import ibu.edu.ba.labexampreparation.model.Users
+import jakarta.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+@HiltAndroidApp
+class LabExam: Application() {
+    @Inject
+    lateinit var database: AppDatabase
+
+    override fun onCreate() {
+        super.onCreate()
+
+        CoroutineScope(Dispatchers.IO).launch {
+
+//            val firstUser = Users(
+//                name = "Haris",
+//                email = "haris.susic@stu.ibu.edu.ba"
+//            )
+
+            // database.usersDao().insert(firstUser)
+
+//            database.usersDao().insert(
+//                Users(
+//                    name = "Adnan",
+//                    email = "adnan.hajro@ibu.edu.ba"
+//                )
+//            )
+
+//            val userToUpdate = database.usersDao().getUserById(1)
+//            if(userToUpdate != null) {
+//                val updatedUser = userToUpdate.copy(
+//                    name = "Tarik",
+//                    email = "tarik.skender@stu.ibu.edu.ba"
+//                )
+//                database.usersDao().update(updatedUser)
+//            }
+
+//            database.usersDao().update(
+//                Users(
+//                    id = 1,
+//                    name = "Tarik",
+//                    email = "tarik.skender@stu.ibu.edu.ba"
+//                )
+//            )
+
+//            database.usersDao().delete(
+//                Users(
+//                    id = 3,
+//                    name = "Tarik",
+//                    email = "tarik.skender@stu.ibu.edu.ba"
+//                )
+//            )
+
+//            database.usersDao().insert(
+//                Users(
+//                    name = "Tarik",
+//                    email = "tarik.skender@stu.ibu.edu.ba"
+//                )
+//            )
+
+            database.usersDao().getAllUsers()
+
+        }
+
+    }
+}
+
+--------------------------------------------------------------------------------------------MAIN-ACTIVITY----------------
+
+package ibu.edu.ba.labexampreparation
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.ui.Modifier
+import dagger.hilt.android.AndroidEntryPoint
+import ibu.edu.ba.labexampreparation.ui.navigation.AppNavHost
+import ibu.edu.ba.labexampreparation.ui.theme.LabExamPreparationTheme
+
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            LabExamPreparationTheme {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    AppNavHost(modifier = Modifier.padding(innerPadding))
+                }
+            }
+        }
+    }
+}
